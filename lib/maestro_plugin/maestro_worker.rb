@@ -1,3 +1,4 @@
+require 'json'
 
 module Maestro
   class MaestroWorker
@@ -102,27 +103,27 @@ module Maestro
     end
     
     def error
-      fields["__error__"]
+      fields['__error__']
     end
     def error?
       !(error.nil? or error.empty?)
     end
     def set_error(error)
-      set_field("__error__", error)
+      set_field('__error__', error)
     end
     
     # end output
     
     #control
     
-    def set_waiting(shouldWait)
-      workitem['__waiting__'] = shouldWait
+    def set_waiting(should_wait)
+      workitem['__waiting__'] = should_wait
       begin
         send_workitem_message
       rescue Exception => e
         Maestro.log.warn "Failed To Send Waiting Message To Server #{e.class} #{e}: #{e.backtrace.join("\n")}"
       end
-      workitem.delete('__waiting__') unless shouldWait
+      workitem.delete('__waiting__') unless should_wait
     end
         
     def cancel
@@ -146,58 +147,58 @@ module Maestro
     end
     # end control
     
-    # persistance
+    # persistence
     def update_fields_in_record(model, name_or_id, record_field, record_value)
-      workitem["__persist__"] = true
-      workitem["__update__"] = true      
-      workitem["__model__"] = model
-      workitem["__record_id__"] = name_or_id.to_s
-      workitem["__record_field__"] = record_field
-      workitem["__record_value__"] = record_value
+      workitem['__persist__'] = true
+      workitem['__update__'] = true
+      workitem['__model__'] = model
+      workitem['__record_id__'] = name_or_id.to_s
+      workitem['__record_field__'] = record_field
+      workitem['__record_value__'] = record_value
       
       send_workitem_message
       
-      workitem.delete("__persist__")
-      workitem.delete("__update__")
+      workitem.delete('__persist__')
+      workitem.delete('__update__')
     end
     
     def create_record_with_fields(model, record_fields, record_values = nil)
-      workitem["__persist__"] = true
-      workitem["__create__"] = true      
-      workitem["__model__"] = model
+      workitem['__persist__'] = true
+      workitem['__create__'] = true
+      workitem['__model__'] = model
       unless record_fields.is_a? Hash
-        Maestro.log.warn "deprecation: create_record_with_fields should be called with a Hash"
-        record_fields = record_fields.join(',') if record_fields.respond_to? "join"
-        record_values = record_values.join(',') if record_values.respond_to? "join"
+        Maestro.log.warn 'deprecation: create_record_with_fields should be called with a Hash'
+        record_fields = record_fields.join(',') if record_fields.respond_to? 'join'
+        record_values = record_values.join(',') if record_values.respond_to? 'join'
       end
       
-      workitem["__record_fields__"] = record_fields
-      workitem["__record_values__"] = record_values
+      workitem['__record_fields__'] = record_fields
+      workitem['__record_values__'] = record_values
       send_workitem_message
       
-      workitem.delete("__persist__")
-      workitem.delete("__create__")
+      workitem.delete('__persist__')
+      workitem.delete('__create__')
     end
     
     def delete_record(model, filter)
-      workitem["__persist__"] = true
-      workitem["__delete__"] = true
-      workitem["__model__"] = model
+      workitem['__persist__'] = true
+      workitem['__delete__'] = true
+      workitem['__model__'] = model
 
-      unless filter.is_a? Hash
-        Maestro.log.warn "deprecation: delete_record should be called with a Hash"
-        workitem["__name__"] = filter.to_s
+      if filter.is_a? Hash
+        workitem['__filter__'] = filter
       else
-        workitem["__filter__"] = filter
+        Maestro.log.warn 'deprecation: delete_record should be called with a Hash'
+        workitem['__name__'] = filter.to_s
       end
       
       send_workitem_message
       
-      workitem.delete("__persist__")
-      workitem.delete("__delete__")
+      workitem.delete('__persist__')
+      workitem.delete('__delete__')
     end
     
-    # end persistance
+    # end persistence
     
     def get_field(field)
       fields[field]

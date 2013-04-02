@@ -4,14 +4,14 @@ require 'logging'
 
 module Maestro
 
-  if !Maestro.const_defined?("Logging")
+  unless Maestro.const_defined?('Logging')
 
     module Logging
 
       def log
         log = Logger.new(STDOUT)
         log.level = Logger::DEBUG
-        return log
+        log
       end
 
     end

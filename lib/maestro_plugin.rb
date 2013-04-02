@@ -9,7 +9,7 @@ module Maestro
     include Maestro::Logging unless Maestro.include?(Maestro::Logging)
   end
 
-  if !Maestro.const_defined?("RuoteParticipants")
+  unless Maestro.const_defined?('RuoteParticipants')
     # Stub out this class for testing. The real implentation is provided by the agent.
     class RuoteParticipants
 
@@ -17,7 +17,7 @@ module Maestro
 
         def send_workitem_message(workitem)
 
-          Maestro.log.debug "Sent Workitem Stream"
+          Maestro.log.debug 'Sent Workitem Stream'
 
         end
 
