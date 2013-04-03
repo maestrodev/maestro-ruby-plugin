@@ -13,10 +13,12 @@ module Maestro
     # Workitem constants
     CONTEXT_OUTPUTS_META = '__context_outputs__'
     OUTPUT_META = '__output__'
+    PREVIOUS_CONTEXT_OUTPUTS_META = '__previous_context_outputs__'
     STREAMING_META = '__streaming__'
     ERROR_META = '__error__'
     WAITING_META = '__waiting__'
     CANCEL_META = '__cancel__'
+    NOT_NEEDED = '__not_needed__'
     LINKS_META = '__links__'
     PERSIST_META = '__persist__'
     MODEL_META = '__model__'
@@ -110,25 +112,23 @@ module Maestro
       end
     end
 
-    #output
-
+    # Set a value in the context output
     def save_output_value(name, value)
       set_field(CONTEXT_OUTPUTS_META, {}) if get_field(CONTEXT_OUTPUTS_META).nil?
       get_field(CONTEXT_OUTPUTS_META)[name] = value
     end
 
+    # Read a value from the context output
     def read_output_value(name)
-      if get_field('__previous_context_outputs__').nil?
+      if get_field(PREVIOUS_CONTEXT_OUTPUTS_META).nil?
         set_field(CONTEXT_OUTPUTS_META, {}) if get_field(CONTEXT_OUTPUTS_META).nil?
         get_field(CONTEXT_OUTPUTS_META)[name]
       else
-        get_field('__previous_context_outputs__')[name]
+        get_field(PREVIOUS_CONTEXT_OUTPUTS_META)[name]
       end
     end
 
     # Sends the specified ouput string to the server for persistence
-
-
     def write_output(output)
       return if output.gsub(/\n/, '').empty?
 
@@ -156,8 +156,6 @@ module Maestro
     #control
 
     # Sets the current task as waiting
-
-
     def set_waiting(should_wait)
       workitem[WAITING_META] = should_wait
       send_workitem_message
@@ -167,7 +165,7 @@ module Maestro
       workitem.delete(WAITING_META) unless should_wait
     end
 
-
+    # Send the "cancel" message to the server
     def cancel
       workitem[CANCEL_META] = true
       send_workitem_message
@@ -177,8 +175,8 @@ module Maestro
       workitem.delete(CANCEL_META)
     end
 
-    NOT_NEEDED = '__not_needed__'
 
+    # Send the "not needed" message to the server.
     def not_needed
       workitem[NOT_NEEDED] = true
       send_workitem_message
@@ -249,7 +247,6 @@ module Maestro
       fields[field]
     end
 
-
     def fields
       workitem['fields']
     end
@@ -261,13 +258,11 @@ module Maestro
       fields[field] = value
     end
 
-
-
+    # Adds a link to be displayed in the Maestro UI.
     def add_link(name, url)
       set_field(LINKS_META, []) if fields[LINKS_META].nil?
       fields[LINKS_META] << {'name' => name, 'url' => url}
     end
-
 
     private
 
