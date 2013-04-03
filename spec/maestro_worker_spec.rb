@@ -2,17 +2,46 @@ require 'spec_helper'
 
 describe Maestro::MaestroWorker do
 
+  describe 'Mock' do
+
+    before :each do
+      Maestro::MaestroWorker.mock!
+    end
+
+    after :each do
+      Maestro::MaestroWorker.unmock!
+    end
+
+    it 'should mock send_workitem_message calls' do
+      @workitem = {'fields' => {}}
+
+      @worker = Maestro::MaestroWorker.new
+      @worker.stub(:workitem => @workitem)
+      @worker.should_not_receive(:ruote_participant)
+
+      @worker.write_output('Some test string')
+
+    end
+
+  end
+
   describe 'Messaging' do
     before :each do
+      @workitem = {'fields' => {}}
+      @ruote_participants = double("ruote_participants")
+      @ruote_participants.should_receive(:send_workitem_message).with(@workitem)
+
       @worker = Maestro::MaestroWorker.new
-      @worker.workitem = {'fields' => {}}
-      @worker.should_receive(:send_workitem_message).at_least(:once)
+      @worker.stub(:ruote_participants => @ruote_participants)
+      @worker.stub(:workitem => @workitem)
+      @worker.should_receive(:send_workitem_message).at_least(:once).and_call_original
+
     end
   
     it 'should send a write_output message' do
       @worker.write_output('Some Silly String')
-    
       @worker.workitem['__output__'].should eql('Some Silly String')
+      @worker.workitem['__streaming__'].should be_nil
     end
     
     it 'should send a not needed message' do
@@ -26,6 +55,7 @@ describe Maestro::MaestroWorker do
     end
   
     it 'should send a set_waiting message' do
+      @ruote_participants.should_receive(:send_workitem_message).with(@workitem)
       @worker.set_waiting(true)
       @worker.workitem['__waiting__'].should be_true
       
@@ -93,5 +123,20 @@ describe Maestro::MaestroWorker do
       @worker.fields['b'] = 'b'
       @worker.fields['b'].should eq('b')
     end
+  end
+
+  describe 'Helpers' do
+    before :each do
+      @worker = Maestro::MaestroWorker.new
+      @worker.workitem = {'fields' => {}}
+    end
+
+    it 'should validate JSON data contained in strings' do
+      @worker.is_json?('{"key": "a string"}').should be_true
+      @worker.is_json?('a string').should be_false
+    end
+
+
+
   end
 end

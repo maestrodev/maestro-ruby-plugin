@@ -1,4 +1,4 @@
-# Copyright 2011© MaestroDev.  All rights reserved.
+# Copyright 2013© MaestroDev.  All rights reserved.
 
 require 'logging'
 

@@ -26,8 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'gemfury', '~> 0.4.9'
   spec.add_development_dependency 'jruby-openssl'
-
-  spec.add_development_dependency 'rspec', '2.7.0'
+  spec.add_development_dependency 'rspec', '~> 2.13.0'
 
 
 end
