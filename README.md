@@ -1,5 +1,5 @@
-maestro_plugin Gem
-===================
+Maestro Ruby Plugin Gem
+=======================
 
 Library For Creating Ruby Based Maestro Plugins
 =======
