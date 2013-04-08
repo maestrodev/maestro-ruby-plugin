@@ -4,24 +4,14 @@ require 'rake/clean'
 
 require File.expand_path('../lib/maestro_plugin/version', __FILE__)
 
-CLEAN.include([ 'pkg', '*.gem'])
+CLEAN.include('pkg')
+CLOBBER.include('.bundle', '.config', 'coverage', 'InstalledFiles', 'spec/reports', 'rdoc', 'test', 'tmp')
 
-task :default => [:build]
+task :default => [:clean, :bundle, :spec, :build]
 
-desc 'Run specs'
-RSpec::Core::RakeTask.new do |t|
-  t.pattern = './spec/**/*_spec.rb' # don't need this, it's default.
-  t.rspec_opts = '--fail-fast --format p --color'
-  # Put spec opts in a file named .rspec in root
-end
+RSpec::Core::RakeTask.new
 
 desc 'Get dependencies with Bundler'
 task :bundle do
-  system 'bundle install'
+  sh %{bundle install}
 end
-
-task :build => [:clean, :bundle, :spec]
-task :build do
-  system 'gem build maestro_plugin.gemspec'
-end
-
