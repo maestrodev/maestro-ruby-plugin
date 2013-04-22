@@ -129,34 +129,32 @@ module Maestro
     end
 
     # Sends the specified ouput string to the server for persistence
-    # If called with :aggregate as an option, the output will be queued up until a number of writes has occurred, or
+    # If called with :buffer as an option, the output will be queued up until a number of writes has occurred, or
     # a reasonable period since the last sent occurred.
-    # Any call without the :aggregate option will cause any aggregated data to be sent immediately.
+    # Any call without the :buffer option will cause any buffered output to be sent immediately.
     #
     # Example:
     #   write_output("I am Sam\n")                      <-- send immediately
-    #   write_output("Sam I am\n", :aggregate => true)  <-- buffer for later
+    #   write_output("Sam I am\n", :buffer => true)     <-- buffer for later
     #   write_output("I like Ham\n")                    <-- sends 'Sam I am\nI like Ham\n'
     def write_output(output, options = {})
       # First time thru?  We need to do some setup!
-      reset_aggregated_data if @aggregated_data.nil?
+      reset_buffered_output if @buffered_output.nil?
 
       # If we have data and its not just a newline add it
       if output && !output.gsub(/\n/, '').empty?
-        @aggregated_data_count = @aggregated_data_count + 1
-        @aggregated_data += output
+        @buffered_output += output
       end
 
       # If a) we have data to write, and
-      #    b) the number of calls to 'aggregate' is > 35 (why 35? no idea),
-      #       or its been > 2 seconds since we last sent
+      #    b) its been > 2 seconds since we last sent
       #
       # The 2 second factor is there to allow slowly accumulating data to be sent out more regularly.
-      if !@aggregated_data.empty? && (!options[:aggregate] || @aggregated_data_count >= 35 || Time.now - @last_write_output > 2)
-        workitem[OUTPUT_META] = @aggregated_data
+      if !@buffered_output.empty? && (!options[:buffer] || Time.now - @last_write_output > 2)
+        workitem[OUTPUT_META] = @buffered_output
         workitem[STREAMING_META] = true
         send_workitem_message
-        reset_aggregated_data
+        reset_buffered_output
       end
     rescue Exception => e
       Maestro.log.warn "Unable To Write Output To Server #{e.class} #{e}: #{e.backtrace.join("\n")}"
@@ -164,9 +162,8 @@ module Maestro
       workitem.delete(STREAMING_META)
     end
 
-    def reset_aggregated_data
-      @aggregated_data_count = 0
-      @aggregated_data = ''
+    def reset_buffered_output
+      @buffered_output = ''
       @last_write_output = Time.now
     end
 

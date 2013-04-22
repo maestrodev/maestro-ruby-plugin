@@ -49,19 +49,19 @@ describe Maestro::MaestroWorker do
       @worker.workitem['__output__'].should eql('Some Silly String')
       @worker.workitem['__streaming__'].should be_nil
 
-      @worker.write_output("1", :aggregate => true)
+      @worker.write_output("1", :buffer => true)
       @worker.workitem['__output__'].should eql('Some Silly String')
       @worker.workitem['__streaming__'].should be_nil
-      @worker.write_output("22", :aggregate => true)
+      @worker.write_output("22", :buffer => true)
       @worker.workitem['__output__'].should eql('Some Silly String')
       @worker.workitem['__streaming__'].should be_nil
 
       # Should auto-send after 2 second delay
       sleep 3
-      @worker.write_output("333", :aggregate => true)
+      @worker.write_output("333", :buffer => true)
       @worker.workitem['__output__'].should eql('122333')
       @worker.workitem['__streaming__'].should be_nil
-      @worker.write_output("4444", :aggregate => true)
+      @worker.write_output("4444", :buffer => true)
       @worker.workitem['__output__'].should eql('122333')
       @worker.workitem['__streaming__'].should be_nil
 
