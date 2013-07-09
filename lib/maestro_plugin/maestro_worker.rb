@@ -151,7 +151,15 @@ module Maestro
       #
       # The 2 second factor is there to allow slowly accumulating data to be sent out more regularly.
       if !@buffered_output.empty? && (!options[:buffer] || Time.now - @last_write_output > 2)
-        workitem[OUTPUT_META] = @buffered_output
+        if !MaestroWorker.mock?
+          workitem[OUTPUT_META] = @buffered_output
+        else
+          # Test mode, we want to retain output - normal operation clears out
+          # data after it is sent
+          workitem[OUTPUT_META] = '' if !workitem[OUTPUT_META]
+          workitem[OUTPUT_META] = workitem[OUTPUT_META] + @buffered_output
+        end
+
         workitem[STREAMING_META] = true
         send_workitem_message
         reset_buffered_output
