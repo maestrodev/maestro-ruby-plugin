@@ -141,10 +141,7 @@ module Maestro
       # First time thru?  We need to do some setup!
       reset_buffered_output if @buffered_output.nil?
 
-      # If we have data and its not just a newline add it
-      if output && !output.gsub(/\n/, '').empty?
-        @buffered_output += output
-      end
+      @buffered_output += output
 
       # If a) we have data to write, and
       #    b) its been > 2 seconds since we last sent
