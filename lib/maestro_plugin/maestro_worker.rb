@@ -103,14 +103,13 @@ module Maestro
       write_output('') # Triggers any remaining buffered output to be sent
       run_callbacks
     rescue MaestroDev::Plugin::PluginError => e
-      # Ensure error is written to output file
-      write_output(e.message)
+      write_output('') # Triggers any remaining buffered output to be sent
       set_error(e.message)
     rescue Exception => e
+      write_output('') # Triggers any remaining buffered output to be sent
       lowerstack = e.backtrace.find_index(caller[0])
       stack = lowerstack ? e.backtrace[0..lowerstack - 1] : e.backtrace
       msg = "Unexpected error executing task: #{e.class} #{e} at\n" + stack.join("\n")
-      write_output(msg)
       Maestro.log.warn("#{msg}\nFull stack:\n" + e.backtrace.join("\n"))
 
       # Let user-supplied exception handler do its thing

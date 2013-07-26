@@ -190,7 +190,7 @@ describe Maestro::MaestroWorker do
 
       @worker.perform(:configerror_test, workitem)
       workitem['fields']['__error__'].should include('Bad Config')
-      workitem['__output__'].should include('Bad Config')
+      workitem['__output__'].should be_nil
     end
 
     it 'should handle a PluginError' do
@@ -198,7 +198,7 @@ describe Maestro::MaestroWorker do
 
       @worker.perform(:pluginerror_test, workitem)
       workitem['fields']['__error__'].should include('PluginError - I had a problem')
-      workitem['__output__'].should include('PluginError - I had a problem')
+      workitem['__output__'].should be_nil
     end
 
     it 'should handle an unexpected Error' do
@@ -206,7 +206,7 @@ describe Maestro::MaestroWorker do
 
       @worker.perform(:error_test, workitem)
       workitem['fields']['__error__'].should include('Unexpected error executing task: Exception noooo')
-      workitem['__output__'].should include('Unexpected error executing task: Exception noooo')
+      workitem['__output__'].should be_nil
     end
   end
 end
