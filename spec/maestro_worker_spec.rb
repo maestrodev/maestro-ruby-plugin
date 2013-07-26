@@ -165,4 +165,48 @@ describe Maestro::MaestroWorker do
     end
 
   end
+
+  describe 'Errors' do
+    class ErrorTestWorker < Maestro::MaestroWorker
+      def configerror_test
+        raise ConfigError, 'Bad Config - what are you feeding me?'
+      end
+
+      def pluginerror_test
+        raise PluginError, 'PluginError - I had a problem'
+      end
+
+      def error_test
+        raise Exception, 'noooo'
+      end
+    end
+
+    before :each do
+      @worker = ErrorTestWorker.new
+    end
+
+    it 'should handle a ConfigError for bad config' do
+      workitem = {'fields' => {}}
+
+      @worker.perform(:configerror_test, workitem)
+      workitem['fields']['__error__'].should include('Bad Config')
+      workitem['__output__'].should include('Bad Config')
+    end
+
+    it 'should handle a PluginError' do
+      workitem = {'fields' => {}}
+
+      @worker.perform(:pluginerror_test, workitem)
+      workitem['fields']['__error__'].should include('PluginError - I had a problem')
+      workitem['__output__'].should include('PluginError - I had a problem')
+    end
+
+    it 'should handle an unexpected Error' do
+      workitem = {'fields' => {}}
+
+      @worker.perform(:error_test, workitem)
+      workitem['fields']['__error__'].should include('Unexpected error executing task: Exception noooo')
+      workitem['__output__'].should include('Unexpected error executing task: Exception noooo')
+    end
+  end
 end

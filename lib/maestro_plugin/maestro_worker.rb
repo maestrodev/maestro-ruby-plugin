@@ -9,6 +9,16 @@ module Maestro
   # run_callbacks which can be customized by specifying an on_complete_handler_method, or on_complete_handler_block.
   #
   class MaestroWorker
+    # General plugin problem.  A plugin can raise errors of this type and have the 'message' portion of the error
+    # automatically logged, and have the plugin-response set to the same (message) and have the execution end
+    class PluginError < StandardError
+    end
+
+    # Configuration error detected - usually as a result of the validation method determining bad/invalid data.
+    # This is treated same as PluginError for now... but maybe one day it'll get wings and fly, so only raise
+    # this error if the plugin cannot execute the task owing to poor parameters.
+    class ConfigError < PluginError
+    end
 
     # Workitem constants
     CONTEXT_OUTPUTS_META = '__context_outputs__'
@@ -88,16 +98,25 @@ module Maestro
       @action, @workitem = action, workitem
       send(action)
       run_callbacks
-    rescue => e
+    rescue PluginError => e
+      # Ensure error is written to output file
+      write_output(e.message)
+      set_error(e.message)
+    rescue Exception => e
+      msg = "Unexpected error executing task: #{e.class} #{e}"
+      write_output(msg)
+      Maestro.log.warn("#{msg} " + e.backtrace.join("\n"))
+
+      # Let user-supplied exception handler do its thing
       handle_exception(e)
+      set_error(msg)
     end
 
+    # Fire supplied exception handlers if supplied, otherwise do nothing
     def handle_exception(e)
-      raise e if self.class.exception_handler_method.nil? && self.class.exception_handler_block.nil?
-
       if self.class.exception_handler_method
         send(self.class.exception_handler_method, e)
-      else
+      elsif self.class.exception_handler_block
         self.class.exception_handler_block.call(e, self)
       end
     end
