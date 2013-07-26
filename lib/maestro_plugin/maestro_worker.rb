@@ -1,14 +1,7 @@
 require 'json'
 
-module Maestro
-
-
-  # Helper Class for Maestro Plugins written in Ruby. The lifecycle of the plugin
-  # starts with a call to the main entry point perform called by the Maestro agent, all the
-  # other methods are helpers that can be used to deal with parsing, errors, etc. The lifecycle ends with a call to
-  # run_callbacks which can be customized by specifying an on_complete_handler_method, or on_complete_handler_block.
-  #
-  class MaestroWorker
+module MaestroDev
+  module Plugin
     # General plugin problem.  A plugin can raise errors of this type and have the 'message' portion of the error
     # automatically logged, and have the plugin-response set to the same (message) and have the execution end
     class PluginError < StandardError
@@ -19,7 +12,17 @@ module Maestro
     # this error if the plugin cannot execute the task owing to poor parameters.
     class ConfigError < PluginError
     end
+  end
+end
 
+module Maestro
+
+  # Helper Class for Maestro Plugins written in Ruby. The lifecycle of the plugin
+  # starts with a call to the main entry point perform called by the Maestro agent, all the
+  # other methods are helpers that can be used to deal with parsing, errors, etc. The lifecycle ends with a call to
+  # run_callbacks which can be customized by specifying an on_complete_handler_method, or on_complete_handler_block.
+  #
+  class MaestroWorker
     # Workitem constants
     CONTEXT_OUTPUTS_META = '__context_outputs__'
     OUTPUT_META = '__output__'
@@ -99,7 +102,7 @@ module Maestro
       send(action)
       write_output('') # Triggers any remaining buffered output to be sent
       run_callbacks
-    rescue PluginError => e
+    rescue MaestroDev::Plugin::PluginError => e
       # Ensure error is written to output file
       write_output(e.message)
       set_error(e.message)

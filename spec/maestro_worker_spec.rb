@@ -169,11 +169,11 @@ describe Maestro::MaestroWorker do
   describe 'Errors' do
     class ErrorTestWorker < Maestro::MaestroWorker
       def configerror_test
-        raise ConfigError, 'Bad Config - what are you feeding me?'
+        raise MaestroDev::Plugin::ConfigError, 'Bad Config - what are you feeding me?'
       end
 
       def pluginerror_test
-        raise PluginError, 'PluginError - I had a problem'
+        raise MaestroDev::Plugin::PluginError, 'PluginError - I had a problem'
       end
 
       def error_test
