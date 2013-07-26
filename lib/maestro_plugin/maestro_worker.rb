@@ -107,9 +107,11 @@ module Maestro
       write_output(e.message)
       set_error(e.message)
     rescue Exception => e
-      msg = "Unexpected error executing task: #{e.class} #{e}"
+      lowerstack = e.backtrace.find_index(caller[0])
+      stack = lowerstack ? e.backtrace[0..lowerstack - 1] : e.backtrace
+      msg = "Unexpected error executing task: #{e.class} #{e} at\n" + stack.join("\n")
       write_output(msg)
-      Maestro.log.warn("#{msg} " + e.backtrace.join("\n"))
+      Maestro.log.warn("#{msg}\nFull stack:\n" + e.backtrace.join("\n"))
 
       # Let user-supplied exception handler do its thing
       handle_exception(e)
