@@ -114,6 +114,8 @@ module Maestro
       # Let user-supplied exception handler do its thing
       handle_exception(e)
       set_error(msg)
+    ensure
+      return @workitem
     end
 
     # Fire supplied exception handlers if supplied, otherwise do nothing
