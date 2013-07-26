@@ -97,6 +97,7 @@ module Maestro
     def perform(action, workitem)
       @action, @workitem = action, workitem
       send(action)
+      write_output('') # Triggers any remaining buffered output to be sent
       run_callbacks
     rescue PluginError => e
       # Ensure error is written to output file
