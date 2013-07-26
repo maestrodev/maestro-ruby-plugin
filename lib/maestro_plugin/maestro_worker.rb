@@ -115,7 +115,10 @@ module Maestro
       handle_exception(e)
       set_error(msg)
     ensure
-      return @workitem
+      # Older agents expected this method to *maybe* return something
+      # .. something that no longer exists, but if we return anything
+      # it will be *wrong* :P
+      return nil
     end
 
     # Fire supplied exception handlers if supplied, otherwise do nothing
