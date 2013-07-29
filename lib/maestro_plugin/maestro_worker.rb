@@ -201,6 +201,10 @@ module Maestro
       @last_write_output = Time.now
     end
 
+    def output
+      workitem[OUTPUT_META]
+    end
+
     def error
       fields[ERROR_META]
     end
