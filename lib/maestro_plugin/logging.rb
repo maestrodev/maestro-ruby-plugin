@@ -3,15 +3,12 @@ require 'logging'
 
 module Maestro
 
-  unless Maestro.const_defined?('Logging')
+  module Logging
 
-    module Logging
-
-      def log
-        ::Logging::Logger.new(STDOUT)
-      end
-
+    def log
+      ::Logging::Logger.new(STDOUT)
     end
+
   end
 
   class << self
