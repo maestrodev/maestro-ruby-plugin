@@ -202,7 +202,12 @@ module Maestro
     end
 
     def output
-      workitem[OUTPUT_META]
+      if MaestroWorker.mock?
+        workitem[OUTPUT_META]
+      else
+        Maestro.log.warn "Output is only accessible when mock is enabled in tests. Otherwise is directly sent to Maestro"
+        nil
+      end
     end
 
     def error

@@ -13,6 +13,10 @@ describe Maestro::MaestroWorker do
       subject.should_not_receive(:ruote_participant)
       subject.write_output('Some test string')
     end
+    context 'when accessing output' do
+      before { subject.write_output("xxx") }
+      its(:output) { should eq("xxx") }
+    end
   end
 
   describe 'Messaging' do
@@ -24,10 +28,11 @@ describe Maestro::MaestroWorker do
       subject.should_receive(:send_workitem_message).at_least(:once).and_call_original
     end
 
-    it 'should send a write_output message' do
-      subject.write_output('Some Silly String')
-      subject.workitem['__output__'].should eql('Some Silly String')
-      subject.workitem['__streaming__'].should be_nil
+    context 'when sending a write_output message' do
+      before { subject.write_output('Some Silly String') }
+      it { subject.workitem['__output__'].should eql('Some Silly String') }
+      it { subject.workitem['__streaming__'].should be_nil }
+      it("output should not be accesible without mock!") { expect(subject.output).to be_nil }
     end
 
     it 'should aggregate output' do
