@@ -1,5 +1,7 @@
 Maestro Ruby Plugin Gem
 =======================
+[![Gem Version](https://badge.fury.io/rb/maestro_plugin.png)](http://badge.fury.io/rb/maestro_plugin)
+[![Code Climate](https://codeclimate.com/github/maestrodev/maestro-ruby-plugin.png)](https://codeclimate.com/github/maestrodev/maestro-ruby-plugin)
 
 Library For Creating Ruby Based Maestro Plugins
 =======
