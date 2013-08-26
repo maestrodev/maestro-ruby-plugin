@@ -318,6 +318,16 @@ module Maestro
       value = default if !default.nil? && (value.nil? || (value.respond_to?(:empty?) && value.empty?))
       value
     end
+
+    # Helper that renders a field as an int
+    def get_int_field(field, default = 0)
+      as_int(get_field(field), default)
+    end
+
+    # Helper that renders a field as a boolean
+    def get_boolean_field(field)
+      as_boolean(get_field(field))
+    end
  
     def fields
       workitem['fields']
@@ -334,6 +344,42 @@ module Maestro
     def add_link(name, url)
       set_field(LINKS_META, []) if fields[LINKS_META].nil?
       fields[LINKS_META] << {'name' => name, 'url' => url}
+    end
+
+    # Field Utility methods
+
+    # Return numeric version of value
+    def as_int(value, default = 0)
+      res = default
+
+      if value
+        if value.is_a?(Fixnum)
+          res = value
+        elsif value.respond_to?(:to_i)
+          res = value.to_i
+        end
+      end
+
+      res
+    end
+
+    # Return boolean version of a value
+    def as_boolean(value)
+      res = false
+
+      if value
+        if value.is_a?(TrueClass) || value.is_a?(FalseClass)
+          res = value
+        elsif value.is_a?(Fixnum)
+          res = value != 0
+        elsif value.respond_to?(:to_s)
+          value = value.to_s.downcase
+
+          res = (value == 't' || value == 'true')
+        end
+      end
+
+      res
     end
 
     private
