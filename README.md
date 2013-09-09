@@ -27,6 +27,14 @@ Or install it yourself as:
 
     $ gem install maestro_plugin
 
+## Changelog
+
+### 0.0.18
+
+logging method is no longer includded by default so it is only used in the plugin specs
+Add `require 'maestro_plugin/logging_stdout'` to your spec_helper to use it in tests
+
+
 ## Usage
 
 ### Directory Layout
