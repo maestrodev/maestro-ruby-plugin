@@ -138,6 +138,8 @@ describe Maestro::MaestroWorker do
       subject.fields['b'] = 'b'
       subject.fields['b'].should eq('b')
     end
+    it { should have_field('a', 'a') }
+    it { should_not have_field('b') }
   end
 
   describe 'Helpers' do
