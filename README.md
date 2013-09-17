@@ -61,6 +61,32 @@ You can use RSpec to perform unit testing. If your plugin invokes any of the uti
 you should make sure to set the MaestroWorker class to "mock" mode so that it doesn't attempt to post messages on the
 response queue. You can do this by calling the *Maestro::MaestroWorker.mock!* method.
 
+The `maestro_plugin/rspec` file add some RSpec custom matchers to use in tests,
+
+* `have_field(name,value)` check that the workitem does or does not contain a field `name`
+
+A typical `spec_helper.rb` would be
+
+
+    require 'rspec'
+    require 'maestro_plugin/logging_stdout'
+    require 'maestro_plugin/rspec'
+    require 'maestro_plugin'
+
+    RSpec.configure do |config|
+      # Only run focused specs:
+      config.filter_run :focus => true
+      config.filter_run_excluding :disabled => true
+
+      # Yet, if there is nothing filtered, run the whole thing.
+      config.run_all_when_everything_filtered = true
+
+      config.before(:each) do
+        Maestro::MaestroWorker.mock!
+      end
+    end
+
+
 ### Packaging Your Plugin
 
 You must package your plugin into a zip file. It must contain the following files and directory:
