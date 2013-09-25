@@ -62,6 +62,21 @@ describe Maestro::MaestroWorker do
       subject.workitem['__streaming__'].should be_nil
     end
 
+    it 'should handle non utf-8 strings with funky characters (complete failure)' do
+      text = "\x8f"
+      text.force_encoding("US-ASCII")
+      subject.write_output(text)
+      subject.workitem['__output__'].should eql("?_?")
+    end
+
+    it 'should handle non utf-8 strings with funky characters (partial failure)' do
+      text = "missing \xc3\xa9"
+      text = text.force_encoding("ASCII-8BIT")
+      expect { text.to_json}.to raise_exception(Encoding::ConverterNotFoundError)
+      subject.write_output(text)
+      subject.workitem['__output__'].should eql("missing \u00E9")
+    end
+
     it 'should send a not needed message' do
       subject.not_needed
       subject.workitem['__not_needed__'].should be_nil

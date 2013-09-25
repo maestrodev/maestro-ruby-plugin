@@ -177,6 +177,38 @@ module Maestro
       #
       # The 2 second factor is there to allow slowly accumulating data to be sent out more regularly.
       if !@buffered_output.empty? && (!options[:buffer] || Time.now - @last_write_output > 2)
+        # Ensure the output is json-able.
+        # It seems some code doesn't wholly respect encoding rules.  We've found some http responses that
+        # don't have the correct encoding, despite the response headers stating 'utf-8', etc.  Same goes
+        # for shell output streams, that don't seem to respect the apps encoding.
+        # What this code does is to try to json encode the @buffered_output.  First a direct conversion,
+        # if that fails, try to force-encoding to utf-8, if that fails, try to remove all chars with
+        # code > 127.  If that fails - we gave it a good shot, and maybe just insert a 'redacted' string
+        # so at least the task doesn't fail :)
+        begin
+          @buffered_output.to_json
+        rescue Exception
+          begin
+            test = @buffered_output
+            test.force_encoding('UTF-8')
+            test.to_json
+            # If forcing encoding worked, updated buffered_output
+            Maestro.log.warn("Had to force encoding to utf-8 for workitem stream")
+            @buffered_output = test
+          rescue Exception
+            begin
+              test = @buffered_output.gsub(/[^\x00-\x7f]/, '?')
+              test.to_json
+              # If worked, updated buffered_output
+              Maestro.log.warn("Had to strip top-bit-set chars for workitem stream")
+              @buffered_output = test
+            rescue Exception
+              Maestro.log.warn("Had to redact block of output, unable to 'to_json' it for workitem stream")
+              @buffered_output = '?_?'
+            end
+          end
+        end
+
         if !MaestroWorker.mock?
           workitem[OUTPUT_META] = @buffered_output
         else
