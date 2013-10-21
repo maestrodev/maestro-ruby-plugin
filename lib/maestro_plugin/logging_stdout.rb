@@ -3,7 +3,7 @@
 # Mock logging methods to redirect all output to stdout
 # DO NOT use in deployed plugins, just in specs
 # ie. in spec_helper.rb
-# require 'maestro_plugin/logging_mock'
+# require 'maestro_plugin/logging_stdout'
 require 'logging'
 
 module Maestro
