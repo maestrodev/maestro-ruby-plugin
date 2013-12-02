@@ -18,8 +18,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'logging', '1.8.0'
-  spec.add_dependency 'rubyzip', '0.9.8'
+  spec.add_dependency 'logging', '>=1.8.0'
+  spec.add_dependency 'rubyzip', '< 1.0.0' # See https://github.com/rubyzip/rubyzip#important-note
   spec.add_dependency 'json', '>= 1.4.6'
 
   spec.add_development_dependency 'bundler', '~> 1.3'
