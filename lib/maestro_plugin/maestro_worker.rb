@@ -187,7 +187,8 @@ module Maestro
         # so at least the task doesn't fail :)
         begin
           @buffered_output.to_json
-        rescue Exception
+        rescue Exception => e1
+          Maestro.log.warn("Unable to 'to_json' output [#{e1}]: #{@buffered_output}")
           begin
             test = @buffered_output
             test.force_encoding('UTF-8')
